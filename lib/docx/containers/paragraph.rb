@@ -48,7 +48,8 @@ module Docx
           end
           styles = { 'font-size' => "#{font_size}pt" }
           styles['text-align'] = alignment if alignment
-          html_tag(is_list_element? ? :li : :p, content: html, styles: styles)
+
+          html_tag(paragraph_type, content: html, styles: styles)
         end
 
         # Array of text runs contained within paragraph
@@ -75,6 +76,15 @@ module Docx
 
         def is_list_element?
           @is_list_element ||= !@node.xpath('w:pPr/w:numPr').empty?
+        end
+
+        def has_list_symbol?
+          @node.xpath('w:r/w:sym/@w:char').first&.value == 'F096'
+        end
+
+        def paragraph_type
+          return :li if is_list_element?|| has_list_symbol?
+          :p
         end
 
         def font_size
