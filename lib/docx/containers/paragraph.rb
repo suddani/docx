@@ -12,7 +12,6 @@ module Docx
           'p'
         end
 
-
         # Child elements: pPr, r, fldSimple, hlink, subDoc
         # http://msdn.microsoft.com/en-us/library/office/ee364458(v=office.11).aspx
         def initialize(node, document_properties = {})
@@ -49,9 +48,8 @@ module Docx
           end
           styles = { 'font-size' => "#{font_size}pt" }
           styles['text-align'] = alignment if alignment
-          html_tag(:p, content: html, styles: styles)
+          html_tag(is_list_element? ? :li : :p, content: html, styles: styles)
         end
-
 
         # Array of text runs contained within paragraph
         def text_runs
@@ -75,11 +73,15 @@ module Docx
           alignment == 'center'
         end
 
+        def is_list_element?
+          @is_list_element ||= !@node.xpath('w:pPr/w:numPr').empty?
+        end
+
         def font_size
           size_tag = @node.xpath('w:pPr//w:sz').first
           size_tag ? size_tag.attributes['val'].value.to_i / 2 : @font_size
         end
-        
+
         alias_method :text, :to_s
 
         private
@@ -89,7 +91,6 @@ module Docx
           alignment_tag = @node.xpath('.//w:jc').first
           alignment_tag ? alignment_tag.attributes['val'].value : nil
         end
-
       end
     end
   end
