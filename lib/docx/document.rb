@@ -92,7 +92,21 @@ module Docx
 
     # Output entire document as a String HTML fragment
     def to_html
-      paragraphs.map(&:to_html).join('\n')
+      in_list = false
+      output = ""
+      paragraphs.each do |p|
+        if p.paragraph_type == :li && !in_list
+          in_list = true
+          output << "<p><ul>"
+        elsif p.paragraph_type != :li && in_list
+          in_list = false
+          output << "</ul></p>"
+        end
+        output << p.to_html
+      end
+      output << "</ul></p>" if in_list
+
+      output
     end
 
     # Save document to provided path
